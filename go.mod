@@ -1,6 +1,6 @@
 module github.com/doeasycode/protoc-gen-swagger
 
-go 1.20
+go 1.16
 
 require (
 	github.com/go-kratos/kratos v1.0.1
