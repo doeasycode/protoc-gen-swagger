@@ -1,4 +1,4 @@
-module protoc-gen-swagger
+module github.com/doeasycode/protoc-gen-swagger
 
 go 1.20
 
