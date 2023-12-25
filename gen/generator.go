@@ -203,7 +203,7 @@ func (t *swaggerGen) getQueryParameter(file *descriptor.FileDescriptorProto,
 	if field.GetType().String() == "TYPE_ENUM" {
 		comment := t.getEnumComment(field.GetTypeName())
 		if comment != "" {
-			p.Description = p.Description + "," + comment
+			p.Description = p.Description + comment
 		}
 	}
 	p.In = "query"
@@ -239,7 +239,7 @@ func (t *swaggerGen) schemaForField(file *descriptor.FileDescriptorProto,
 	if field.GetType().String() == "TYPE_ENUM" {
 		comment := t.getEnumComment(field.GetTypeName())
 		if comment != "" {
-			schema.Description = schema.Description + "," + comment
+			schema.Description = schema.Description + comment
 		}
 	}
 	typ, isArray, format := getFieldSwaggerType(field)
