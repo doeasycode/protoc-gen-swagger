@@ -2,6 +2,7 @@ package gen
 
 import (
 	"encoding/json"
+	"fmt"
 	"google.golang.org/protobuf/types/descriptorpb"
 	"net/http"
 	"reflect"
@@ -100,6 +101,7 @@ func (t *swaggerGen) generateSwagger(file *descriptor.FileDescriptorProto) *plug
 					break
 				}
 			}
+			//log.Println("isComplexRequest = ", isComplexRequest)
 			if !isComplexRequest && apiInfo.HttpMethod == "GET" {
 				for _, field := range request.Descriptor.Field {
 					if !generator.IsScalar(field) {
@@ -197,6 +199,13 @@ func (t *swaggerGen) getQueryParameter(file *descriptor.FileDescriptorProto,
 	} else if validateComment != "" {
 		p.Description = validateComment
 	}
+
+	if field.GetType().String() == "TYPE_ENUM" {
+		comment := t.getEnumComment(field.GetTypeName())
+		if comment != "" {
+			p.Description = p.Description + "," + comment
+		}
+	}
 	p.In = "query"
 	p.Required = generator.GetFieldRequired(field, t.Reg, input)
 	typ, isArray, format := getFieldSwaggerType(field)
@@ -226,6 +235,12 @@ func (t *swaggerGen) schemaForField(file *descriptor.FileDescriptorProto,
 		schema.Description = schema.Description + "," + validateComment
 	} else if validateComment != "" {
 		schema.Description = validateComment
+	}
+	if field.GetType().String() == "TYPE_ENUM" {
+		comment := t.getEnumComment(field.GetTypeName())
+		if comment != "" {
+			schema.Description = schema.Description + "," + comment
+		}
 	}
 	typ, isArray, format := getFieldSwaggerType(field)
 	if !generator.IsScalar(field) {
@@ -284,6 +299,46 @@ func (t *swaggerGen) walkThroughMessages(msg *typemap.MessageDefinition) {
 			t.walkThroughMessages(t.Reg.MessageDefinition(field.GetTypeName()))
 		}
 	}
+}
+
+func (t *swaggerGen) getEnumComment(enumName string) string {
+	var comments []string
+	for _, item := range t.Base.GenFiles {
+		if len(item.EnumType) > 0 {
+			for i, eItem := range item.EnumType {
+				name := "." + item.GetPackage() + "." + *eItem.Name
+				if name == enumName {
+					for i2, vItem := range eItem.Value {
+						comment := getEnumFieldComment(int32(i), int32(i2), item.SourceCodeInfo.Location)
+						if comment != "" {
+							comment = strings.Replace(comment, "\n", "", -1)
+							comments = append(comments, fmt.Sprintf("%d", *vItem.Number)+":"+comment)
+						}
+					}
+					break
+				}
+			}
+		}
+	}
+	if len(comments) > 0 {
+		return "【" + strings.Join(comments, " ") + "】"
+	}
+	return ""
+}
+
+func getEnumFieldComment(enumMsgIdx int32, enumFieldIdx int32, location []*descriptorpb.SourceCodeInfo_Location) string {
+	path := []int32{5, enumMsgIdx, 2, enumFieldIdx}
+	comment := ""
+	for _, infoLocation := range location {
+		if pathEqual(path, infoLocation.Path) {
+			if len(infoLocation.GetLeadingDetachedComments()) > 0 {
+				return strings.Join(infoLocation.GetLeadingDetachedComments(), " ")
+			} else {
+				return infoLocation.GetLeadingComments()
+			}
+		}
+	}
+	return comment
 }
 
 func getFieldSwaggerType(field *descriptor.FieldDescriptorProto) (typeName string, isArray bool, formatName string) {
