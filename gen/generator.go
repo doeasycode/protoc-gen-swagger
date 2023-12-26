@@ -347,10 +347,10 @@ func getFieldSwaggerType(field *descriptor.FieldDescriptorProto) (typeName strin
 	case descriptor.FieldDescriptorProto_TYPE_BOOL:
 		typeName = "boolean"
 	case descriptor.FieldDescriptorProto_TYPE_DOUBLE:
-		typeName = "number"
+		typeName = "double"
 		formatName = "double"
 	case descriptor.FieldDescriptorProto_TYPE_FLOAT:
-		typeName = "number"
+		typeName = "float"
 		formatName = "float"
 	case
 		descriptor.FieldDescriptorProto_TYPE_INT64,
@@ -364,7 +364,7 @@ func getFieldSwaggerType(field *descriptor.FieldDescriptorProto) (typeName strin
 		descriptor.FieldDescriptorProto_TYPE_SFIXED64,
 		descriptor.FieldDescriptorProto_TYPE_SINT32,
 		descriptor.FieldDescriptorProto_TYPE_SINT64:
-		typeName = "integer"
+		typeName = "int"
 	case
 		descriptor.FieldDescriptorProto_TYPE_STRING,
 		descriptor.FieldDescriptorProto_TYPE_BYTES:
