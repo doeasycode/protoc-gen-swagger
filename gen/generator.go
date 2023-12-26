@@ -128,7 +128,7 @@ func (t *swaggerGen) generateSwagger(file *descriptor.FileDescriptorProto) *plug
 			// 所以需要把code msg data 这一级加上
 			resp.Schema.Type = "object"
 			resp.Schema.Properties = &swaggerSchemaObjectProperties{}
-			p := keyVal{Key: "code", Value: &schemaCore{Type: "integer"}}
+			p := keyVal{Key: "code", Value: &schemaCore{Type: "int"}}
 			*resp.Schema.Properties = append(*resp.Schema.Properties, p)
 			p = keyVal{Key: "message", Value: &schemaCore{Type: "string"}}
 			*resp.Schema.Properties = append(*resp.Schema.Properties, p)
