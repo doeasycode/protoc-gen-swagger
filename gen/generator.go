@@ -149,7 +149,7 @@ func (t *swaggerGen) generateSwagger(file *descriptor.FileDescriptorProto) *plug
 		for _, field := range msg.Descriptor.Field {
 			p := keyVal{Key: generator.GetFormOrJSONName(field)}
 			schema := t.schemaForField(file, msg, field)
-			if generator.GetFieldRequired(field, t.Reg, msg) {
+			if GetFieldRequired(field, t.Reg, msg) {
 				def.Required = append(def.Required, p.Key)
 			}
 			p.Value = schema
@@ -207,7 +207,7 @@ func (t *swaggerGen) getQueryParameter(file *descriptor.FileDescriptorProto,
 		}
 	}
 	p.In = "query"
-	p.Required = generator.GetFieldRequired(field, t.Reg, input)
+	p.Required = GetFieldRequired(field, t.Reg, input)
 	typ, isArray, format := getFieldSwaggerType(field)
 	if isArray {
 		p.Items = &swaggerItemsObject{}
@@ -221,6 +221,37 @@ func (t *swaggerGen) getQueryParameter(file *descriptor.FileDescriptorProto,
 	return p
 }
 
+func GetFieldRequired(
+	f *descriptor.FieldDescriptorProto,
+	reg *typemap.Registry,
+	md *typemap.MessageDefinition,
+) bool {
+	fComment, _ := reg.FieldComments(md, f)
+	var tags []reflect.StructTag
+	{
+		//get required info from gogoproto.moretags
+		moretags := tag.GetMoreTags(f)
+		if moretags != nil {
+			tags = []reflect.StructTag{reflect.StructTag(*moretags)}
+		}
+	}
+	if len(tags) == 0 {
+		tags = tag.GetTagsInComment(fComment.Leading)
+	}
+	validateTag := tag.GetTagValue("validate", tags)
+	var validateRules []string
+	if validateTag != "" {
+		validateRules = strings.Split(validateTag, ",")
+	}
+	required := false
+	for _, rule := range validateRules {
+		if rule == "required" || rule == "require" {
+			required = true
+		}
+	}
+	return required
+}
+
 func (t *swaggerGen) schemaForField(file *descriptor.FileDescriptorProto,
 	msg *typemap.MessageDefinition,
 	field *descriptor.FieldDescriptorProto) swaggerSchemaObject {
@@ -231,8 +262,8 @@ func (t *swaggerGen) schemaForField(file *descriptor.FileDescriptorProto,
 	}
 	schema.Description = strings.Trim(fComment.Leading, "\n\r ")
 	validateComment := getValidateComment(field)
-	if schema.Description != "" && validateComment != "" {
-		schema.Description = schema.Description + "," + validateComment
+	if schema.Description != "" {
+		//schema.Description = schema.Description + "," + validateComment
 	} else if validateComment != "" {
 		schema.Description = validateComment
 	}
