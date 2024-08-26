@@ -128,7 +128,7 @@ func (t *swaggerGen) generateSwagger(file *descriptor.FileDescriptorProto) *plug
 			// 所以需要把code msg data 这一级加上
 			resp.Schema.Type = "object"
 			resp.Schema.Properties = &swaggerSchemaObjectProperties{}
-			p := keyVal{Key: "code", Value: &schemaCore{Type: "int"}}
+			p := keyVal{Key: "code", Value: &schemaCore{Type: "integer"}}
 			*resp.Schema.Properties = append(*resp.Schema.Properties, p)
 			p = keyVal{Key: "message", Value: &schemaCore{Type: "string"}}
 			*resp.Schema.Properties = append(*resp.Schema.Properties, p)
@@ -243,11 +243,15 @@ func GetFieldRequired(
 	if validateTag != "" {
 		validateRules = strings.Split(validateTag, ",")
 	}
+	//log.Println("validateRules = ", validateRules)
 	required := false
 	for _, rule := range validateRules {
-		if rule == "required" || rule == "require" {
+		if strings.Contains(rule, "required") || strings.Contains(rule, "require") {
 			required = true
 		}
+		//if rule == "required" || rule == "require" {
+		//	required = true
+		//}
 	}
 	return required
 }
@@ -395,7 +399,7 @@ func getFieldSwaggerType(field *descriptor.FieldDescriptorProto) (typeName strin
 		descriptor.FieldDescriptorProto_TYPE_SFIXED64,
 		descriptor.FieldDescriptorProto_TYPE_SINT32,
 		descriptor.FieldDescriptorProto_TYPE_SINT64:
-		typeName = "int"
+		typeName = "integer"
 	case
 		descriptor.FieldDescriptorProto_TYPE_STRING,
 		descriptor.FieldDescriptorProto_TYPE_BYTES:
