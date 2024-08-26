@@ -130,7 +130,7 @@ func (t *swaggerGen) generateSwagger(file *descriptor.FileDescriptorProto) *plug
 			resp.Schema.Properties = &swaggerSchemaObjectProperties{}
 			p := keyVal{Key: "code", Value: &schemaCore{Type: "integer"}}
 			*resp.Schema.Properties = append(*resp.Schema.Properties, p)
-			p = keyVal{Key: "message", Value: &schemaCore{Type: "string"}}
+			p = keyVal{Key: "msg", Value: &schemaCore{Type: "string"}}
 			*resp.Schema.Properties = append(*resp.Schema.Properties, p)
 			p = keyVal{Key: "data", Value: schemaCore{Ref: "#/definitions/" + meth.GetOutputType()}}
 			*resp.Schema.Properties = append(*resp.Schema.Properties, p)
